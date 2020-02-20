@@ -20,9 +20,9 @@ namespace HashCode2020
         /// </summary>
         /// <param name="libraries"></param>
         /// <param name="data"></param>
-        static async Task WriteResultAsync(string name, int libraries, int[][] data)
+        public static async Task WriteResultAsync(string name, int libraries, int[][] data)
         {
-            using (StreamWriter writer = System.IO.File.CreateText("name"))
+            using (StreamWriter writer = System.IO.File.CreateText(name))
             {
                 await writer.WriteAsync(libraries.ToString());
                 await writer.WriteAsync('\n');
@@ -33,12 +33,13 @@ namespace HashCode2020
                     await writer.WriteAsync(' ');
                     await writer.WriteAsync(data[i][1].ToString());
                     await writer.WriteAsync('\n');
+
                     for (int x = 2; x < data[i].Length; x++)
                     {
                         await writer.WriteAsync(data[i][x].ToString());
-                        await writer.WriteAsync(' ');
+                        if (x < (data[i].Length-1)) await writer.WriteAsync(' ');
                     }
-                    await writer.WriteAsync('\n');
+                    if (i < data.Length -1) await writer.WriteAsync('\n');
                 }
             }
         }
