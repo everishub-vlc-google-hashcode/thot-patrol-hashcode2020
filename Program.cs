@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HashCode2020
 {
@@ -10,7 +11,7 @@ namespace HashCode2020
         static File FileIn;
         static File FileOut;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             if (args.Length > 1)
             {
@@ -19,6 +20,8 @@ namespace HashCode2020
 
                 Read();
                 // Do things ...
+
+                var content = await FileIn.ReadLineAsync();
             }
             else
             {
