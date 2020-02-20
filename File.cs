@@ -6,58 +6,31 @@ using System.Threading.Tasks;
 
 namespace HashCode2020
 {
-    public class File
+    public class FileRead
     {
-        private string fileName;
-        private int lineNumber;
-        public File(string fileName)
+        private StreamReader Reader;
+
+        public FileRead(string fileName)
         {
-            this.fileName = fileName;
-            this.lineNumber = 0;
+            this.Reader = new StreamReader(fileName);
         }
 
 
         public async Task<string> ReadLineAsync()
         {
-            return await ReadLineAsync(lineNumber++);
+            return await Reader.ReadLineAsync();
         }
 
 
-        public async Task<string> ReadLineAsync(int lineNumber)
+        public void Close()
         {
-            string line;
-            int ptr = 0;
-            using (StreamReader file = new StreamReader(fileName))
-            {
-                while ((line = await file.ReadLineAsync()) != null)
-                {
-                    if (lineNumber == ptr)
-                        break;
-                    ptr++;
-                }
-                file.Close();
-            };
-            return ptr > lineNumber ? null : line;
+            Reader.Close();
+            Reader.Dispose();
+            Reader = null;
         }
-
-
-
-        public void Reset()
-        {
-            lineNumber = 0;
-        }
-
-
-        public async Task WriteLineAsync(string line)
-        {
-            using (StreamWriter file = new StreamWriter(fileName, true))
-            {
-                await file.WriteLineAsync(line);
-                await file.FlushAsync();
-            }
-        }
-
 
 
     }
+   
+
 }

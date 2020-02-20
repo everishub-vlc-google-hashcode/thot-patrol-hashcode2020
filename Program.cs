@@ -8,8 +8,8 @@ namespace HashCode2020
 {
     class Program
     {
-        static File FileIn;
-        static File FileOut;
+        static FileRead FileIn;
+
 
         static int Books;
         static int Libraries;
@@ -27,18 +27,28 @@ namespace HashCode2020
 
         static async Task Main(string[] args)
         {
+#if !DEBUG
             if (args.Length > 1)
             {
-                FileIn = new File(args[0]);
-                FileOut = new File(args[1]);
+                FileIn = new FileRead(args[0]);
+//                FileOut = new File(args[1]);
+#else
+            FileIn = new File(@"c:\dev\thot-patrol-hashcode2020\bin\Release\netcoreapp3.1\c_incunabula.txt");
+ //           FileOut = new File ("f_libraries_of_the_world.out");
+#endif
 
-                Read();
-                Console.WriteLine($"{args[0]}");
+                await Read();
                 Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
 
-                // Do things ...
+                int l = 0;
+                foreach (Library b in LibraryList)
+                {
+                    Console.WriteLine($"[{l++}]  SignUpTime {b.SignUpTime} -  BookCount: {b.BookCount} - BooksPerDay: {b.BooksPerDay}");
+                }
 
-                var content = await FileIn.ReadLineAsync();
+                FileIn.Close();
+#if !DEBUG
+
             }
             else
             {
@@ -51,13 +61,14 @@ namespace HashCode2020
                 Console.WriteLine(string.Empty);
                 Environment.Exit(0);
             }
+#endif
         }
 
 
         static int[] Scores;
         static Library[] LibraryList;
 
-        static async void Read()
+        static async Task Read()
         {
             // List<int> Scores = new List<int>();
 
@@ -72,15 +83,16 @@ namespace HashCode2020
             line = await FileIn.ReadLineAsync();
             Scores = line.Split(' ').Select(x => int.Parse(x)).ToArray();
 
+            LibraryList = new Library[Libraries];
 
             for (int f = 0; f < Libraries; f++)
             {
                 Library lib = new Library();
 
                 line = await FileIn.ReadLineAsync();
-                var libHEader = line.Split(' ').Select(x => int.Parse(x)).ToArray();
-                lib.BookCount = libHEader[0];
-                lib.SignUpTime = libHEader[1];
+                var libHEader   = line.Split(' ').Select(x => int.Parse(x)).ToArray();
+                lib.BookCount   = libHEader[0];
+                lib.SignUpTime  = libHEader[1];
                 lib.BooksPerDay = libHEader[2];
 
 
