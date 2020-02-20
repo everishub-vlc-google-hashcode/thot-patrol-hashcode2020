@@ -21,6 +21,7 @@ namespace HashCode2020
             public int SignUpTime { get; set; }
             public int BooksPerDay { get; set; }
             public int[] Books { get; set; }
+            public int TotalBookScore { get; set; }
         }
 
 
@@ -86,7 +87,7 @@ namespace HashCode2020
 
                 line = await FileIn.ReadLineAsync();
                 lib.Books = line.Split(' ').Select(x => int.Parse(x)).ToArray();
-
+                lib.TotalBookScore = lib.Books.Sum(x => Scores[x]);
                 LibraryList[f] = lib;
             }
         }
