@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HashCode2020
 {
@@ -10,14 +11,17 @@ namespace HashCode2020
         static File FileIn;
         static File FileOut;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             if (args.Length > 1)
             {
                 FileIn  = new File(args[0]);
                 FileOut = new File(args[1]);
 
+                Read();
                 // Do things ...
+
+                var content = await FileIn.ReadLineAsync();
             }
             else
             {
@@ -31,5 +35,33 @@ namespace HashCode2020
                 Environment.Exit(0);
             }
         }
+
+
+        static int[] VarArray;
+
+        static async void Read()
+        {
+            List<int> VarList = new List<int>();
+            
+            string line = await FileIn.ReadLineAsync();
+
+            // Header
+            string[] Header = line.Split(' ');
+
+            while ((line = await FileIn.ReadLineAsync()) != null)
+            {
+                foreach (string s in line.Split(' '))
+                    VarList.Add(int.Parse(s));
+            }
+
+            VarArray = VarList.ToArray();
+            VarList.Clear();
+            VarList = null;
+
+        }
+
+
+
+
     }
 }

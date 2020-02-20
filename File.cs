@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HashCode2020
 {
@@ -16,19 +17,19 @@ namespace HashCode2020
         }
 
 
-        public string ReadLine()
+        public async Task<string> ReadLineAsync()
         {
-            return ReadLine(lineNumber++);
+            return await ReadLineAsync(lineNumber++);
         }
 
 
-        public string ReadLine(int lineNumber)
+        public async Task<string> ReadLineAsync(int lineNumber)
         {
             string line;
             int ptr = 0;
             using (StreamReader file = new StreamReader(fileName))
             {
-                while ((line = file.ReadLine()) != null)
+                while ((line = await file.ReadLineAsync()) != null)
                 {
                     if (lineNumber == ptr)
                         break;
@@ -47,12 +48,12 @@ namespace HashCode2020
         }
 
 
-        public void WriteLine(string line)
+        public async Task WriteLineAsync(string line)
         {
             using (StreamWriter file = new StreamWriter(fileName, true))
             {
-                file.WriteLine(line);
-                file.Flush();
+                await file.WriteLineAsync(line);
+                await file.FlushAsync();
             }
         }
 
