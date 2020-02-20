@@ -10,6 +10,15 @@ namespace HashCode2020
     {
         static FileRead FileIn;
 
+        static string[] fileNames =
+        {
+            "a_example.txt",
+            "b_read_on.txt",
+            "c_incunabula.txt",
+            "d_tough_choices.txt",
+            "e_so_many_books.txt",
+            "f_libraries_of_the_world.txt"
+        };
 
         static int Books;
         static int Libraries;
@@ -32,15 +41,18 @@ namespace HashCode2020
 
         static async Task Main(string[] args)
         {
-#if !DEBUG
-            if (args.Length > 1)
+            foreach (var file in fileNames)
             {
-                FileIn = new FileRead(args[0]);
-//                FileOut = new File(args[1]);
-#else
-            FileIn = new FileRead(@"..\..\..\b_read_on.txt");
- //           FileOut = new File ("f_libraries_of_the_world.out");
-#endif
+                await Avril(file);
+            }
+        }
+
+
+
+        static async Task Avril(string filename)
+        {
+
+            FileIn = new FileRead(@$"..\..\..\{filename}");
 
                 await Read();
                 Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
@@ -53,8 +65,11 @@ namespace HashCode2020
 
                 FileIn.Close();
 
+
+            var alreadySentBooks = new bool[Books];
+
             // Order libraries by libraryScore
-            LibraryList = LibraryList.OrderByDescending(x => x.LibraryScore).ToArray();
+            LibraryList = LibraryList.OrderBy(x => x.SignUpTime).ToArray();
 
             var librariesToRead = 0;
 
@@ -78,22 +93,34 @@ namespace HashCode2020
             {
                 var libArray = new int[LibraryList[x].BookCount + 2];
 
+                var bookCountToSend = 0;
+
                 libArray[0] = LibraryList[x].Id;
-                libArray[1] = LibraryList[x].BookCount;
 
                 var bookPointer = 0;
 
                 for (int i = 2; i < libArray.Length; i++)
                 {
-                    libArray[i] = LibraryList[x].Books[bookPointer];
+
+                    if (!alreadySentBooks[LibraryList[x].Books[bookPointer]]) 
+                    {
+                        libArray[i] = LibraryList[x].Books[bookPointer];
+                        alreadySentBooks[LibraryList[x].Books[bookPointer]] = true;
+                        bookCountToSend++;
+                    }
+                    else
+                    {
+                        libArray[i] = int.MinValue;
+                    }
+
                     bookPointer++;
                 }
 
-
+                libArray[1] = bookCountToSend;
                 libsToSend[x] = libArray;
             }
 
-            await WriteResult.WriteResultAsync("output_b.txt", librariesToRead, libsToSend);
+            await WriteResult.WriteResultAsync(filename, librariesToRead, libsToSend);
 
 #if !DEBUG
 
