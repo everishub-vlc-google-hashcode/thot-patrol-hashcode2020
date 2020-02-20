@@ -36,7 +36,7 @@ namespace HashCode2020
 
                     for (int x = 2; x < data[i].Length; x++)
                     {
-                        await writer.WriteAsync(data[i][x].ToString());
+                        if (data[i][x] != int.MinValue) await writer.WriteAsync(data[i][x].ToString());
                         if (x < (data[i].Length-1)) await writer.WriteAsync(' ');
                     }
                     if (i < data.Length -1) await writer.WriteAsync('\n');

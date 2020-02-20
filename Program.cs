@@ -10,6 +10,15 @@ namespace HashCode2020
     {
         static FileRead FileIn;
 
+        static string[] fileNames =
+        {
+            "a_example.txt",
+            "b_read_on.txt",
+            "c_incunabula.txt",
+            "d_tough_choices.txt",
+            "e_so_many_books.txt",
+            "f_libraries_of_the_world.txt"
+        };
 
         static int Books;
         static int Libraries;
@@ -23,7 +32,13 @@ namespace HashCode2020
             public int SignUpTime { get; set; }
             public int BooksPerDay { get; set; }
             public int[] Books { get; set; }
+            public List<int> BooksToSend { get; set; } = new List<int>();
             public int TotalBookScore { get; set; }
+
+
+            public int StartDay { get; set; }
+
+            public int BooksBeforeDeadline { get; set; }
 
             public int LibraryScore { get; set; }
         }
@@ -32,29 +47,55 @@ namespace HashCode2020
 
         static async Task Main(string[] args)
         {
-#if !DEBUG
-            if (args.Length > 1)
+            foreach (var file in fileNames)
             {
-                FileIn = new FileRead(args[0]);
-//                FileOut = new File(args[1]);
-#else
-            FileIn = new FileRead(@"..\..\..\b_read_on.txt");
- //           FileOut = new File ("f_libraries_of_the_world.out");
-#endif
+                await Avril(file);
+            }
+        }
+
+
+
+        static async Task Avril(string filename)
+        {
+
+            FileIn = new FileRead(@$"..\..\..\{filename}");
 
                 await Read();
                 Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
 
                 int l = 0;
-                foreach (Library b in LibraryList)
-                {
-                    Console.WriteLine($"[{l++}]  SignUpTime {b.SignUpTime} -  BookCount: {b.BookCount} - BooksPerDay: {b.BooksPerDay}");
-                }
+                //foreach (Library b in LibraryList)
+                //{
+                //    //Console.WriteLine($"[{l++}]  SignUpTime {b.SignUpTime} -  BookCount: {b.BookCount} - BooksPerDay: {b.BooksPerDay}");
+                //}
 
                 FileIn.Close();
 
-            // Order libraries by libraryScore
-            LibraryList = LibraryList.OrderByDescending(x => x.LibraryScore).ToArray();
+
+            var alreadySentBooks = new bool[Books];
+
+            // Order libraries by signUpTime
+            LibraryList = LibraryList.OrderBy(x => x.SignUpTime).ToArray();
+
+            //Order library books by highest score
+            foreach (var lib in LibraryList)
+            {
+                lib.Books = lib.Books.OrderByDescending(x => Scores[x]).ToArray();
+            }
+
+            //compute start days
+
+            var previousDay = 0;
+
+            for (int i = 0; i < LibraryList.Length; i++)
+            {
+                LibraryList[i].StartDay = previousDay + LibraryList[i].SignUpTime;
+
+                previousDay = LibraryList[i].StartDay;
+
+                LibraryList[i].BooksBeforeDeadline = (DaysForScanning - previousDay) * LibraryList[i].BooksPerDay;
+            }
+
 
             var librariesToRead = 0;
 
@@ -67,33 +108,46 @@ namespace HashCode2020
                 if (totalSignUpTime < DaysForScanning) librariesToRead++;
             }
 
+            foreach (var lib in LibraryList)
+            {
+                var addedBooks = 0;
+                for (int i = 0; (i < lib.Books.Length) && addedBooks <= lib.BooksBeforeDeadline; i++)
+                {
+                    if (!alreadySentBooks[lib.Books[i]])
+                    {
+                        lib.BooksToSend.Add(lib.Books[i]);
+                        alreadySentBooks[lib.Books[i]] = true;
+                        addedBooks++;
+                    }
+                }
+            }
 
-            Console.WriteLine("We can read" + librariesToRead + "before running out of time");
-
-
+            Console.WriteLine("We can read " + librariesToRead + " libraries before running out of time");
 
             var libsToSend = new int[librariesToRead][];
 
             for (int x = 0; x < librariesToRead; x++)
             {
-                var libArray = new int[LibraryList[x].BookCount + 2];
-
-                libArray[0] = LibraryList[x].Id;
-                libArray[1] = LibraryList[x].BookCount;
-
-                var bookPointer = 0;
-
-                for (int i = 2; i < libArray.Length; i++)
+                if (LibraryList[x].BooksToSend.Count > 0)
                 {
-                    libArray[i] = LibraryList[x].Books[bookPointer];
-                    bookPointer++;
+                    var libArray = new int[LibraryList[x].BooksToSend.Count + 2];
+
+                    libArray[0] = LibraryList[x].Id;
+                    libArray[1] = LibraryList[x].BooksToSend.Count;
+
+                    for (int i = 2; i < libArray.Length; i++)
+                    {
+                        libArray[i] = LibraryList[x].BooksToSend[i - 2];
+                    }
+
+                    libsToSend[x] = libArray;
                 }
-
-
-                libsToSend[x] = libArray;
             }
 
-            await WriteResult.WriteResultAsync("output_b.txt", librariesToRead, libsToSend);
+
+            libsToSend = libsToSend.Where(x => x != null).ToArray();
+
+            await WriteResult.WriteResultAsync(filename, libsToSend.Length, libsToSend);
 
 #if !DEBUG
 
