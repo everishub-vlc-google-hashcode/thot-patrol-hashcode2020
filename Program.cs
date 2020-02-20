@@ -86,66 +86,109 @@ namespace HashCode2020
             //compute start days
 
             var previousDay = 0;
+            var days = new List<Library>[DaysForScanning];
 
             for (int i = 0; i < LibraryList.Length; i++)
             {
                 LibraryList[i].StartDay = previousDay + LibraryList[i].SignUpTime;
-
                 previousDay = LibraryList[i].StartDay;
-
-                LibraryList[i].BooksBeforeDeadline = (DaysForScanning - previousDay) * LibraryList[i].BooksPerDay;
-            }
-
-
-            var librariesToRead = 0;
-
-            var totalSignUpTime = 0;
-
-            foreach (var item in LibraryList)
-            {
-                totalSignUpTime += item.SignUpTime;
-
-                if (totalSignUpTime < DaysForScanning) librariesToRead++;
-            }
-
-            foreach (var lib in LibraryList)
-            {
-                var addedBooks = 0;
-                for (int i = 0; (i < lib.Books.Length) && addedBooks <= lib.BooksBeforeDeadline; i++)
+                var daysForScanning = (DaysForScanning - previousDay);
+                LibraryList[i].BooksBeforeDeadline = daysForScanning * LibraryList[i].BooksPerDay;
+                for (int d = 0; d < daysForScanning; d++)
                 {
-                    if (!alreadySentBooks[lib.Books[i]])
+                    if(days[d] == null){ days[d] = new List<Library>();}
+                    days[d].Add(LibraryList[i]);   
+                }
+            }
+
+            for (int d = 0; d < days.Length; d++)
+            {
+                if (days[d] != null)
+                {
+                    foreach (var library in days[d])
                     {
-                        lib.BooksToSend.Add(lib.Books[i]);
-                        alreadySentBooks[lib.Books[i]] = true;
-                        addedBooks++;
+                        var bookSent = 0;
+                        for (int b = 0; (b < library.Books.Length) && (bookSent <library.BooksPerDay); b++)
+                        {
+                            if (!alreadySentBooks[library.Books[b]])
+                            {
+                                library.BooksToSend.Add(library.Books[b]);
+                                alreadySentBooks[library.Books[b]] = true;
+                                bookSent++;
+                            }
+                        }
                     }
                 }
             }
 
-            Console.WriteLine("We can read " + librariesToRead + " libraries before running out of time");
-
-            var libsToSend = new int[librariesToRead][];
-
-            for (int x = 0; x < librariesToRead; x++)
+            var librarysToSend = LibraryList.Where(x => x.BooksToSend.Count > 0).ToArray();
+            var libsToSend = new int[librarysToSend.Length][];
+            for (int i = 0; i < librarysToSend.Length; i++)
             {
-                if (LibraryList[x].BooksToSend.Count > 0)
+                var current = librarysToSend[i];
+                libsToSend[i] = new int[current.BooksToSend.Count+2];
+                libsToSend[i][0] = current.Id;
+                libsToSend[i][1] = current.BooksToSend.Count;
+                for (int b = 0; b < current.BooksToSend.Count; b++)
                 {
-                    var libArray = new int[LibraryList[x].BooksToSend.Count + 2];
-
-                    libArray[0] = LibraryList[x].Id;
-                    libArray[1] = LibraryList[x].BooksToSend.Count;
-
-                    for (int i = 2; i < libArray.Length; i++)
-                    {
-                        libArray[i] = LibraryList[x].BooksToSend[i - 2];
-                    }
-
-                    libsToSend[x] = libArray;
+                    libsToSend[i][b + 2] = current.BooksToSend[b];
                 }
+
             }
 
 
-            libsToSend = libsToSend.Where(x => x != null).ToArray();
+
+            //var librariesToRead = 0;
+
+            //var totalSignUpTime = 0;
+
+            //foreach (var item in LibraryList)
+            //{
+            //    totalSignUpTime += item.SignUpTime;
+
+            //    if (totalSignUpTime < DaysForScanning) librariesToRead++;
+            //}
+
+            //foreach (var lib in LibraryList)
+            //{
+            //    var addedBooks = 0;
+            //    for (int i = 0; (i < lib.Books.Length) && addedBooks <= lib.BooksBeforeDeadline; i++)
+            //    {
+            //        if (!alreadySentBooks[lib.Books[i]])
+            //        {
+            //            lib.BooksToSend.Add(lib.Books[i]);
+            //            alreadySentBooks[lib.Books[i]] = true;
+            //            addedBooks++;
+            //        }
+            //    }
+            //}
+
+
+
+            //Console.WriteLine("We can read " + librariesToRead + " libraries before running out of time");
+
+            //var libsToSend = new int[librariesToRead][];
+
+            //for (int x = 0; x < librariesToRead; x++)
+            //{
+            //    if (LibraryList[x].BooksToSend.Count > 0)
+            //    {
+            //        var libArray = new int[LibraryList[x].BooksToSend.Count + 2];
+
+            //        libArray[0] = LibraryList[x].Id;
+            //        libArray[1] = LibraryList[x].BooksToSend.Count;
+
+            //        for (int i = 2; i < libArray.Length; i++)
+            //        {
+            //            libArray[i] = LibraryList[x].BooksToSend[i - 2];
+            //        }
+
+            //        libsToSend[x] = libArray;
+            //    }
+            //}
+
+
+            //libsToSend = libsToSend.Where(x => x != null).ToArray();
 
             await WriteResult.WriteResultAsync(filename, libsToSend.Length, libsToSend);
 
