@@ -41,6 +41,7 @@ namespace HashCode2020
             public int BooksBeforeDeadline { get; set; }
 
             public int LibraryScore { get; set; }
+            public int StartBook { get; set; }
         }
 
 
@@ -60,16 +61,16 @@ namespace HashCode2020
 
             FileIn = new FileRead(@$"..\..\..\{filename}");
 
-                await Read();
-                Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
+            await Read();
+            Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
 
-                int l = 0;
-                //foreach (Library b in LibraryList)
-                //{
-                //    //Console.WriteLine($"[{l++}]  SignUpTime {b.SignUpTime} -  BookCount: {b.BookCount} - BooksPerDay: {b.BooksPerDay}");
-                //}
+            int l = 0;
+            //foreach (Library b in LibraryList)
+            //{
+            //    //Console.WriteLine($"[{l++}]  SignUpTime {b.SignUpTime} -  BookCount: {b.BookCount} - BooksPerDay: {b.BooksPerDay}");
+            //}
 
-                FileIn.Close();
+            FileIn.Close();
 
 
             var alreadySentBooks = new bool[Books];
@@ -96,8 +97,8 @@ namespace HashCode2020
                 LibraryList[i].BooksBeforeDeadline = daysForScanning * LibraryList[i].BooksPerDay;
                 for (int d = 0; d < daysForScanning; d++)
                 {
-                    if(days[d] == null){ days[d] = new List<Library>();}
-                    days[d].Add(LibraryList[i]);   
+                    if (days[d] == null) { days[d] = new List<Library>(); }
+                    days[d].Add(LibraryList[i]);
                 }
             }
 
@@ -108,13 +109,14 @@ namespace HashCode2020
                     foreach (var library in days[d])
                     {
                         var bookSent = 0;
-                        for (int b = 0; (b < library.Books.Length) && (bookSent <library.BooksPerDay); b++)
+                        for (int b = library.StartBook; (b < library.Books.Length) && (bookSent < library.BooksPerDay); b++)
                         {
                             if (!alreadySentBooks[library.Books[b]])
                             {
                                 library.BooksToSend.Add(library.Books[b]);
                                 alreadySentBooks[library.Books[b]] = true;
                                 bookSent++;
+                                library.StartBook++;
                             }
                         }
                     }
@@ -126,7 +128,7 @@ namespace HashCode2020
             for (int i = 0; i < librarysToSend.Length; i++)
             {
                 var current = librarysToSend[i];
-                libsToSend[i] = new int[current.BooksToSend.Count+2];
+                libsToSend[i] = new int[current.BooksToSend.Count + 2];
                 libsToSend[i][0] = current.Id;
                 libsToSend[i][1] = current.BooksToSend.Count;
                 for (int b = 0; b < current.BooksToSend.Count; b++)
@@ -238,12 +240,12 @@ namespace HashCode2020
                 Library lib = new Library();
 
                 line = await FileIn.ReadLineAsync();
-                var libHEader   = line.Split(' ').Select(x => int.Parse(x)).ToArray();
+                var libHEader = line.Split(' ').Select(x => int.Parse(x)).ToArray();
 
                 lib.Id = f;
 
-                lib.BookCount   = libHEader[0];
-                lib.SignUpTime  = libHEader[1];
+                lib.BookCount = libHEader[0];
+                lib.SignUpTime = libHEader[1];
                 lib.BooksPerDay = libHEader[2];
 
 
