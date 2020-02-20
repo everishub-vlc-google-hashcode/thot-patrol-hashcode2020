@@ -17,6 +17,7 @@ namespace HashCode2020
                 FileIn  = new File(args[0]);
                 FileOut = new File(args[1]);
 
+                Read();
                 // Do things ...
             }
             else
@@ -31,5 +32,27 @@ namespace HashCode2020
                 Environment.Exit(0);
             }
         }
+
+
+        static void Read()
+        {
+
+            /*
+             *     List<int> PizzaList = new List<int>();
+            string line = FileIn.ReadLine();
+            string[] h = line.Split(' ');
+            Slices = int.Parse(h[0]);
+            Pizzas = int.Parse(h[1]);
+            while ((line = FileIn.ReadLine()) != null)
+            {
+                foreach (string s in line.Split(' '))
+                    PizzaList.Add(int.Parse(s));
+            }
+*/
+        }
+
+
+
+
     }
 }
