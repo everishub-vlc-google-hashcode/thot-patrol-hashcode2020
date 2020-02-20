@@ -37,21 +37,27 @@ namespace HashCode2020
         }
 
 
-        static void Read()
-        {
+        static int[] VarArray;
 
-            /*
-             *     List<int> PizzaList = new List<int>();
-            string line = FileIn.ReadLine();
-            string[] h = line.Split(' ');
-            Slices = int.Parse(h[0]);
-            Pizzas = int.Parse(h[1]);
-            while ((line = FileIn.ReadLine()) != null)
+        static async void Read()
+        {
+            List<int> VarList = new List<int>();
+            
+            string line = await FileIn.ReadLineAsync();
+
+            // Header
+            string[] Header = line.Split(' ');
+
+            while ((line = await FileIn.ReadLineAsync()) != null)
             {
                 foreach (string s in line.Split(' '))
-                    PizzaList.Add(int.Parse(s));
+                    VarList.Add(int.Parse(s));
             }
-*/
+
+            VarArray = VarList.ToArray();
+            VarList.Clear();
+            VarList = null;
+
         }
 
 
