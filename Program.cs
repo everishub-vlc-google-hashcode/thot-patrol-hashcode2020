@@ -11,14 +11,31 @@ namespace HashCode2020
         static File FileIn;
         static File FileOut;
 
+        static int Books;
+        static int Libraries;
+        static int DaysForScanning;
+
+        public class Library
+        {
+            public int BookCount { get; set; }
+            public int SignUpTime { get; set; }
+            public int BooksPerDay { get; set; }
+            public int[] Books { get; set; }
+        }
+
+
+
         static async Task Main(string[] args)
         {
             if (args.Length > 1)
             {
-                FileIn  = new File(args[0]);
+                FileIn = new File(args[0]);
                 FileOut = new File(args[1]);
 
                 Read();
+                Console.WriteLine($"{args[0]}");
+                Console.WriteLine($"Libraries: {Libraries} - Books: {Books} - DaysForScanning: {DaysForScanning}");
+
                 // Do things ...
 
                 var content = await FileIn.ReadLineAsync();
@@ -37,31 +54,46 @@ namespace HashCode2020
         }
 
 
-        static int[] VarArray;
+        static int[] Scores;
+        static Library[] LibraryList;
 
         static async void Read()
         {
-            List<int> VarList = new List<int>();
-            
+            // List<int> Scores = new List<int>();
+
             string line = await FileIn.ReadLineAsync();
 
             // Header
             string[] Header = line.Split(' ');
+            Books = int.Parse(Header[0]);
+            Libraries = int.Parse(Header[1]);
+            DaysForScanning = int.Parse(Header[2]);
 
-            while ((line = await FileIn.ReadLineAsync()) != null)
+            line = await FileIn.ReadLineAsync();
+            Scores = line.Split(' ').Select(x => int.Parse(x)).ToArray();
+
+
+            for (int f = 0; f < Libraries; f++)
             {
-                foreach (string s in line.Split(' '))
-                    VarList.Add(int.Parse(s));
+                Library lib = new Library();
+
+                line = await FileIn.ReadLineAsync();
+                var libHEader = line.Split(' ').Select(x => int.Parse(x)).ToArray();
+                lib.BookCount = libHEader[0];
+                lib.SignUpTime = libHEader[1];
+                lib.BooksPerDay = libHEader[2];
+
+
+                line = await FileIn.ReadLineAsync();
+                lib.Books = line.Split(' ').Select(x => int.Parse(x)).ToArray();
+
+                LibraryList[f] = lib;
             }
-
-            VarArray = VarList.ToArray();
-            VarList.Clear();
-            VarList = null;
-
         }
 
 
-
-
     }
+
+
+
 }
